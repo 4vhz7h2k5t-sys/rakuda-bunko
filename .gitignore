@@ -1,0 +1,10 @@
+node_modules
+.next
+.open-next
+.vercel
+.wrangler
+dist
+out
+*.log
+.DS_Store
+.env*
