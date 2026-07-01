@@ -6,23 +6,26 @@ export default function ContactSection() {
   return (
     <SectionPage
       id="contact"
+      className="contact-section"
       eyebrow="Contact / Footer"
       title="最新情報・お問い合わせはInstagramへ。"
       lead={
-        <div className="space-y-5">
+        <div className="space-y-4">
           <p>営業日、メニュー、日々のお知らせはInstagramで更新されています。</p>
           <p>お出かけ前に最新情報をご確認ください。</p>
         </div>
       }
       right={
-        <footer className="flex h-full flex-col justify-between">
-          <div className="soft-card flex flex-1 flex-col items-start justify-center p-8">
-            <RakudaLogo />
+        <footer className="contact-footer">
+          <div className="contact-card">
+            <div className="contact-logo-wrap">
+              <RakudaLogo />
+            </div>
             <a
               href={site.instagramUrl}
               target="_blank"
               rel="noreferrer"
-              className="mt-10 inline-flex h-24 w-24 items-center justify-center border border-[#9b6a3d] bg-[#9b6a3d] text-white transition hover:bg-[#4a3528]"
+              className="contact-instagram"
               aria-label="Instagramを見る"
             >
               <svg
@@ -54,9 +57,9 @@ export default function ContactSection() {
               @rakuda.bunko
             </p>
           </div>
-          <div className="mt-4 border-t border-[#e6d8c8] pt-5">
-            <p className="text-sm leading-7 text-[#3a3028]">{site.demoNotice}</p>
-            <p className="fine-label mt-3 text-xs uppercase text-[#b08968]">
+          <div className="contact-note">
+            <p>{site.demoNotice}</p>
+            <p className="fine-label">
               Demo site / unofficial
             </p>
           </div>

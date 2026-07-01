@@ -26,17 +26,15 @@ export default function PageFlipShell({ pages }: PageFlipShellProps) {
   const shellRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [isMobileBook, setIsMobileBook] = useState(false);
 
   const pageCount = pages.length;
   const pageProgress = progress * Math.max(0, pageCount - 1);
   const turnIndex = Math.min(pageCount - 2, Math.floor(pageProgress));
   const localProgress =
     pageCount <= 1 || turnIndex < 0 ? 0 : clamp(pageProgress - turnIndex, 0, 1);
-  const turnAmount = smoothstep(0.03, 0.9, localProgress);
-  const revealAmount = smoothstep(0.08, 0.78, localProgress);
-  const settleAmount = smoothstep(0.72, 0.98, localProgress);
-  const currentHideAmount = smoothstep(0.12, 0.84, localProgress);
+  const turnAmount = smoothstep(0.02, 0.96, localProgress);
+  const revealAmount = smoothstep(0.16, 0.74, localProgress);
+  const currentHideAmount = smoothstep(0.1, 0.9, localProgress);
   const currentPage =
     pageProgress >= pageCount - 1 ? pageCount - 1 : Math.min(pageCount - 1, Math.round(pageProgress));
   const activeId = pages[currentPage]?.id;
@@ -56,17 +54,12 @@ export default function PageFlipShell({ pages }: PageFlipShellProps) {
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const mobile = window.matchMedia("(max-width: 860px)");
     const updateMode = () => setReducedMotion(reduced.matches);
-    const updateMobile = () => setIsMobileBook(mobile.matches);
 
     updateMode();
-    updateMobile();
     reduced.addEventListener("change", updateMode);
-    mobile.addEventListener("change", updateMobile);
     return () => {
       reduced.removeEventListener("change", updateMode);
-      mobile.removeEventListener("change", updateMobile);
     };
   }, []);
 
@@ -154,7 +147,10 @@ export default function PageFlipShell({ pages }: PageFlipShellProps) {
         style={{ height: `${pageCount * 112}vh` }}
       >
         <div className="book-viewport">
-          <div className="book-stage" aria-live="polite">
+          <div
+            className={`book-stage ${currentPage === 0 ? "is-cover-active" : ""}`}
+            aria-live="polite"
+          >
             {pages.map((page, index) => {
               const isVisible =
                 index === turnIndex ||
@@ -162,7 +158,7 @@ export default function PageFlipShell({ pages }: PageFlipShellProps) {
                 (index === pageCount - 1 && pageProgress > pageCount - 1.02);
               const isNext = index === nextIndex && index !== turnIndex;
               const isTurningBase = index === turnIndex && turnIndex < pageCount - 1;
-              const baseOpacity = isTurningBase && isMobileBook ? 1 - currentHideAmount * 0.92 : 1;
+              const hideInset = isTurningBase ? `${100 * currentHideAmount}%` : "0%";
 
               return (
                 <div
@@ -170,11 +166,8 @@ export default function PageFlipShell({ pages }: PageFlipShellProps) {
                   className="spread-layer"
                   aria-hidden={!isVisible}
                   style={{
-                    opacity: isVisible ? (isNext ? revealAmount : baseOpacity) : 0,
-                    clipPath:
-                      isTurningBase && !isMobileBook
-                        ? `inset(0 ${50 * currentHideAmount}% 0 0)`
-                        : undefined,
+                    opacity: isVisible ? (isNext ? revealAmount : 1) : 0,
+                    clipPath: isTurningBase ? `inset(0 ${hideInset} 0 0)` : undefined,
                     zIndex: isNext ? 1 : index === turnIndex ? 2 : 0
                   }}
                 >
@@ -183,12 +176,15 @@ export default function PageFlipShell({ pages }: PageFlipShellProps) {
               );
             })}
 
-            {turnIndex >= 0 && turnIndex < pageCount - 1 ? (
+            {turnIndex >= 0 &&
+            turnIndex < pageCount - 1 &&
+            localProgress > 0.006 &&
+            localProgress < 0.985 ? (
               <div
-                className="turning-page"
+                className={`turning-page ${turnIndex === 0 ? "is-cover-turn" : ""}`}
                 style={{
-                  transform: `rotateY(${-82 * turnAmount}deg)`,
-                  opacity: 1 - settleAmount,
+                  transform: `rotateY(${-(turnIndex === 0 ? 156 : 168) * turnAmount}deg)`,
+                  opacity: 1,
                   boxShadow: `${-24 * turnAmount}px 18px 48px rgb(60 40 20 / ${
                     0.1 + turnAmount * 0.2
                   })`
